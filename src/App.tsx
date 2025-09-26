@@ -109,7 +109,7 @@ const App = () => {
 
   // Admin Functions
   const handleAdminLogin = () => {
-    if (adminPassword === 'wakalatnama2024') {
+    if (adminPassword === 'wakalatguru2024') {
       setIsAdmin(true);
       setShowAdminLogin(false);
       setAdminPassword('');
@@ -481,7 +481,7 @@ const App = () => {
           <div className="flex items-center space-x-2">
             <Scale className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Wakalatnama
+              wakalatguru
             </span>
           </div>
           
@@ -647,7 +647,7 @@ const App = () => {
               </div>
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-xs text-blue-700 text-center font-medium">
-                  Demo Password: wakalatnama2024
+                  Demo Password: wakalatguru2024
                 </p>
               </div>
             </div>
@@ -1336,19 +1336,19 @@ const App = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Scale className="h-8 w-8 text-blue-400" />
-            <span className="text-2xl font-bold">Wakalatnama</span>
+            <span className="text-2xl font-bold">wakalatguru</span>
           </div>
           <p className="text-gray-400 mb-4">
             Your trusted legal partner for finding qualified lawyers and staying updated with Indian law.
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-            <span>contact@wakalatnama.in</span>
+            <span>contact@wakalatguru.in</span>
             <span>+91-11-4567-8900</span>
             <span>New Delhi, India</span>
             {isAdmin && <span className="text-red-400">Admin Mode Active</span>}
           </div>
           <div className="border-t border-gray-700 pt-4 mt-4">
-            <p>&copy; 2024 Wakalatnama. All rights reserved. | Legal Services Platform for India</p>
+            <p>&copy; 2024 wakalatguru. All rights reserved. | Legal Services Platform for India</p>
           </div>
         </div>
       </footer>
