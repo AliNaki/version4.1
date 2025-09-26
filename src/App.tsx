@@ -656,6 +656,145 @@ const App = () => {
       )}
     </nav>
   );
+   {/* Tab Content */}
+            {activeTab === 'hire-lawyer' && (
+              <div className="bg-blue-50 rounded-lg p-8">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Find Qualified Lawyers</h3>
+                    <ul className="space-y-3 text-gray-600 mb-6">
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <span>Browse verified lawyer profiles</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <span>Compare ratings and specializations</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <span>Book consultations instantly</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-blue-600" />
+                        <span>Transparent pricing ₹2,000-₹3,000/hour</span>
+                      </li>
+                    </ul>
+                    <button 
+                      onClick={() => { setCurrentPage('lawyers'); setActiveTab('hire-lawyer'); }}
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                    >
+                      Browse Lawyers
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {lawyers.slice(0, 4).map(lawyer => (
+                      <div key={lawyer.id} className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className="text-3xl mb-2">{lawyer.image}</div>
+                        <h4 className="font-semibold text-sm">{lawyer.name}</h4>
+                        <p className="text-xs text-gray-600">{lawyer.specialization}</p>
+                        <div className="flex items-center space-x-1 mt-1">
+                          <Star className="h-3 w-3 text-yellow-400 fill-current" />
+                          <span className="text-xs">{lawyer.rating}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'quiz' && (
+              <div className="bg-indigo-50 rounded-lg p-8">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Test Your Legal Knowledge</h3>
+                    <ul className="space-y-3 text-gray-600 mb-6">
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-600" />
+                        <span>Comprehensive quiz categories</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-600" />
+                        <span>30-minute timed sessions</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-600" />
+                        <span>Detailed explanations</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-indigo-600" />
+                        <span>Grade scoring and progress tracking</span>
+                      </li>
+                    </ul>
+                    <button 
+                      onClick={() => { setCurrentPage('quiz'); setActiveTab('quiz'); }}
+                      className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+                    >
+                      Start Quiz
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {quizCategories.slice(0, 4).map(category => (
+                      <div key={category.id} className="bg-white p-4 rounded-lg shadow-sm text-center">
+                        <div className="text-3xl mb-2">{category.icon}</div>
+                        <h4 className="font-semibold text-sm">{category.name}</h4>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'blog' && (
+              <div className="bg-purple-50 rounded-lg p-8">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Stay Updated with Legal Insights</h3>
+                    <ul className="space-y-3 text-gray-600 mb-6">
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-600" />
+                        <span>Expert legal analysis</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-600" />
+                        <span>Latest law updates</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-600" />
+                        <span>Practical legal guides</span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <CheckCircle className="h-5 w-5 text-purple-600" />
+                        <span>Community discussions</span>
+                      </li>
+                    </ul>
+                    <button 
+                      onClick={() => { setCurrentPage('blog'); setActiveTab('blog'); }}
+                      className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
+                    >
+                      Read Articles
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {blogPosts.slice(0, 2).map(post => (
+                      <div key={post.id} className="bg-white p-4 rounded-lg shadow-sm">
+                        <h4 className="font-semibold text-sm mb-1 line-clamp-2">{post.title}</h4>
+                        <p className="text-xs text-gray-600 mb-2">{post.excerpt}</p>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{post.author}</span>
+                          <span>{post.readTime}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
 
   // Admin Dashboard Component
   const AdminDashboard = () => (
