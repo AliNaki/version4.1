@@ -656,7 +656,7 @@ const App = () => {
       )}
     </nav>
   );
-   {/* Tab Content */}
+   /* Tab Content */
             {activeTab === 'hire-lawyer' && (
               <div className="bg-blue-50 rounded-lg p-8">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
