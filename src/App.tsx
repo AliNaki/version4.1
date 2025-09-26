@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Star, MapPin, Phone, Mail, BookOpen, Users, Award, ChevronRight, Search, Filter, User, Calendar, MessageCircle, Video, ArrowLeft, CheckCircle, X, Menu, Home, Scale, FileText, UserCheck } from 'lucide-react';
+import { Clock, Star, MapPin, Phone, Mail, BookOpen, Users, Award, ChevronRight, Search, Filter, User, Calendar, MessageCircle, Video, ArrowLeft, CheckCircle, X, Menu, Home, Scale, FileText, UserCheck, Settings, Plus, Edit, Trash2, Save, Shield } from 'lucide-react';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -10,7 +10,7 @@ const App = () => {
     started: false,
     currentQuestion: 0,
     answers: [],
-    timeLeft: 1800, // 30 minutes in seconds
+    timeLeft: 1800,
     completed: false,
     score: 0
   });
@@ -18,9 +18,17 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecialization, setFilterSpecialization] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Sample data
-  const lawyers = [
+  
+  // Admin System States
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [adminSection, setAdminSection] = useState('lawyers');
+  const [editingItem, setEditingItem] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  
+  // Dynamic Data States
+  const [lawyers, setLawyers] = useState([
     {
       id: 1,
       name: "Advocate Priya Sharma",
@@ -30,7 +38,7 @@ const App = () => {
       location: "New Delhi",
       price: "₹2,500/hour",
       image: "👩‍⚖️",
-      about: "Specializing in criminal defense with over a decade of experience in high-profile cases. Fluent in Hindi, English, and Punjabi.",
+      about: "Specializing in criminal defense with over a decade of experience in high-profile cases.",
       languages: ["Hindi", "English", "Punjabi"],
       education: "LLB from Delhi University, LLM from JNU",
       achievements: ["Best Criminal Lawyer Award 2023", "500+ successful cases"],
@@ -47,49 +55,48 @@ const App = () => {
       location: "Mumbai",
       price: "₹3,000/hour",
       image: "👨‍⚖️",
-      about: "Expert in family disputes, divorce proceedings, and child custody cases. Known for sensitive handling of family matters.",
+      about: "Expert in family disputes, divorce proceedings, and child custody cases.",
       languages: ["Hindi", "English", "Marathi"],
       education: "LLB from Government Law College Mumbai",
       achievements: ["Family Law Expert of the Year 2022", "1000+ cases resolved"],
       reviews: 203,
       phone: "+91-9876543211",
       email: "rajesh.kumar@legal.com"
-    },
-    {
-      id: 3,
-      name: "Advocate Sunita Patel",
-      specialization: "Corporate Law",
-      experience: "10 years",
-      rating: 4.7,
-      location: "Bangalore",
-      price: "₹2,800/hour",
-      image: "👩‍💼",
-      about: "Corporate legal advisor with expertise in company law, mergers, and acquisitions. Served major IT companies.",
-      languages: ["Hindi", "English", "Gujarati"],
-      education: "LLB from National Law School Bangalore",
-      achievements: ["Corporate Lawyer of the Year 2021", "100+ M&A deals"],
-      reviews: 89,
-      phone: "+91-9876543212",
-      email: "sunita.patel@legal.com"
-    },
-    {
-      id: 4,
-      name: "Advocate Vikram Singh",
-      specialization: "Property Law",
-      experience: "18 years",
-      rating: 4.9,
-      location: "Gurgaon",
-      price: "₹2,200/hour",
-      image: "👨‍💼",
-      about: "Property law specialist with extensive experience in real estate transactions, property disputes, and documentation.",
-      languages: ["Hindi", "English"],
-      education: "LLB from Punjab University",
-      achievements: ["Property Law Expert Award", "2000+ property deals"],
-      reviews: 312,
-      phone: "+91-9876543213",
-      email: "vikram.singh@legal.com"
     }
-  ];
+  ]);
+
+  const [quizQuestions, setQuizQuestions] = useState({
+    constitutional: [
+      {
+        question: "Which Article of the Indian Constitution guarantees the Right to Equality?",
+        options: ["Article 14", "Article 15", "Article 16", "Article 17"],
+        correct: 0,
+        explanation: "Article 14 guarantees equality before law and equal protection of laws."
+      }
+    ],
+    criminal: [
+      {
+        question: "Under which section of IPC is murder defined?",
+        options: ["Section 300", "Section 302", "Section 299", "Section 304"],
+        correct: 0,
+        explanation: "Section 300 of IPC defines murder, while Section 302 prescribes punishment for murder."
+      }
+    ]
+  });
+
+  const [blogPosts, setBlogPosts] = useState([
+    {
+      id: 1,
+      title: "Understanding Consumer Rights in India",
+      excerpt: "Learn about your rights as a consumer under the Consumer Protection Act 2019.",
+      content: "The Consumer Protection Act 2019 has revolutionized consumer rights in India.",
+      author: "Advocate Meera Joshi",
+      authorBio: "Consumer Rights Expert with 8 years of experience",
+      date: "March 15, 2024",
+      readTime: "5 min read",
+      category: "Consumer Law"
+    }
+  ]);
 
   const quizCategories = [
     { id: 'constitutional', name: 'Constitutional Law', icon: '📜' },
@@ -100,191 +107,26 @@ const App = () => {
     { id: 'consumer', name: 'Consumer Rights', icon: '🛒' }
   ];
 
-  const quizQuestions = {
-    constitutional: [
-      {
-        question: "Which Article of the Indian Constitution guarantees the Right to Equality?",
-        options: ["Article 14", "Article 15", "Article 16", "Article 17"],
-        correct: 0,
-        explanation: "Article 14 guarantees equality before law and equal protection of laws."
-      },
-      {
-        question: "The Constitution of India was adopted on which date?",
-        options: ["15th August 1947", "26th January 1950", "26th November 1949", "2nd October 1947"],
-        correct: 2,
-        explanation: "The Constitution was adopted on 26th November 1949 and came into effect on 26th January 1950."
-      }
-    ],
-    criminal: [
-      {
-        question: "Under which section of IPC is murder defined?",
-        options: ["Section 300", "Section 302", "Section 299", "Section 304"],
-        correct: 0,
-        explanation: "Section 300 of IPC defines murder, while Section 302 prescribes punishment for murder."
-      },
-      {
-        question: "What is the maximum punishment for theft under IPC?",
-        options: ["2 years", "3 years", "5 years", "7 years"],
-        correct: 1,
-        explanation: "Under Section 379, theft is punishable with imprisonment up to 3 years or fine or both."
-      }
-    ]
+  // Admin Functions
+  const handleAdminLogin = () => {
+    if (adminPassword === 'wakalatnama2024') {
+      setIsAdmin(true);
+      setShowAdminLogin(false);
+      setAdminPassword('');
+      setCurrentPage('admin');
+    } else {
+      alert('Invalid password!');
+    }
   };
 
-  const blogPosts = [
-    {
-      id: 1,
-      title: "Understanding Consumer Rights in India: A Comprehensive Guide",
-      excerpt: "Learn about your rights as a consumer under the Consumer Protection Act 2019 and how to file complaints effectively.",
-      content: `
-The Consumer Protection Act 2019 has revolutionized consumer rights in India. Here's what every citizen should know:
+  const handleAdminLogout = () => {
+    setIsAdmin(false);
+    setCurrentPage('home');
+    setEditingItem(null);
+    setShowForm(false);
+  };
 
-## Key Rights Under the Act
-
-### 1. Right to Safety
-Consumers have the right to be protected against goods and services that are hazardous to life and property.
-
-### 2. Right to Information
-You have the right to be informed about the quality, quantity, potency, purity, standard and price of goods or services.
-
-### 3. Right to Choose
-Freedom to choose from a variety of goods and services at competitive prices.
-
-### 4. Right to be Heard
-Your interests will receive due consideration at appropriate forums.
-
-### 5. Right to Redressal
-You have the right to seek redressal against unfair trade practices or exploitation.
-
-## Filing Complaints
-
-The new act has made filing complaints easier:
-- Online complaint filing through e-Daakhil portal
-- Video conferencing for hearings
-- Simplified procedures for small claims
-
-## Recent Updates
-
-The Act now covers e-commerce transactions and provides better protection for online consumers. It also includes provisions for product liability and class action suits.
-
-Remember, as a consumer, you have powerful rights. Don't hesitate to use them when faced with unfair practices.
-      `,
-      author: "Advocate Meera Joshi",
-      authorBio: "Consumer Rights Expert with 8 years of experience",
-      date: "March 15, 2024",
-      readTime: "5 min read",
-      category: "Consumer Law"
-    },
-    {
-      id: 2,
-      title: "Property Law Updates: New RERA Guidelines for 2024",
-      excerpt: "Latest amendments to RERA and what they mean for property buyers and developers in India.",
-      content: `
-The Real Estate (Regulation and Development) Act has seen significant updates in 2024. Here's what you need to know:
-
-## Major Changes
-
-### Enhanced Transparency
-- Mandatory quarterly updates on project status
-- Real-time financial disclosures
-- Better complaint resolution mechanisms
-
-### Digital Integration
-- Online registration processes
-- Digital document verification
-- E-governance implementation
-
-### Penalty Revisions
-- Stricter penalties for non-compliance
-- Fast-track resolution for disputes
-- Enhanced consumer protection
-
-## Impact on Buyers
-
-Property buyers now have:
-- Better legal protection
-- Faster dispute resolution
-- More transparent dealings
-
-## Developer Obligations
-
-Developers must now:
-- Maintain higher transparency standards
-- Provide regular project updates
-- Ensure timely project completion
-
-Stay informed about these changes to make better property decisions.
-      `,
-      author: "Advocate Rohit Malhotra",
-      authorBio: "Property Law Specialist with 12 years of experience",
-      date: "March 10, 2024",
-      readTime: "7 min read",
-      category: "Property Law"
-    },
-    {
-      id: 3,
-      title: "How to File FIR Online: Step-by-Step Guide",
-      excerpt: "Complete guide to filing First Information Report online through state police portals and what documents you need.",
-      content: `
-Filing an FIR online has become easier with digital initiatives. Here's your complete guide:
-
-## When Can You File Online FIR?
-
-Online FIRs can be filed for:
-- Theft of mobile phones, vehicles, or other property
-- Lost documents
-- Cyber crimes
-- Cheating and fraud cases
-
-## Step-by-Step Process
-
-### 1. Visit the State Police Website
-Each state has its own online FIR portal:
-- Delhi: delhipolice.gov.in
-- Mumbai: mumbaipolice.gov.in
-- Bangalore: ksp.gov.in
-
-### 2. Fill the Online Form
-Provide:
-- Personal details
-- Incident details
-- Location and time
-- Supporting documents
-
-### 3. Submit and Get Receipt
-- Submit the form
-- Receive acknowledgment number
-- Print the receipt
-
-### 4. Follow Up
-- Track status online
-- Visit police station if required
-- Cooperate with investigation
-
-## Required Documents
-
-- Identity proof (Aadhaar, PAN, etc.)
-- Address proof
-- Supporting evidence
-- Witness details (if any)
-
-## Important Points
-
-- Online FIR has same legal validity
-- Response time is usually 24-48 hours
-- Some cases may require physical visit
-
-Remember, filing false FIR is a punishable offense. Ensure all information is accurate and truthful.
-      `,
-      author: "Advocate Priya Gupta",
-      authorBio: "Criminal Law Expert and Digital Rights Advocate",
-      date: "March 8, 2024",
-      readTime: "6 min read",
-      category: "Criminal Law"
-    }
-  ];
-
-  // Timer for quiz
+  // Quiz functions
   useEffect(() => {
     let timer;
     if (quizState.started && !quizState.completed && quizState.timeLeft > 0) {
@@ -363,14 +205,275 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
     });
   };
 
-  const filteredLawyers = lawyers.filter(lawyer => {
-    const matchesSearch = lawyer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         lawyer.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         lawyer.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterSpecialization === '' || lawyer.specialization === filterSpecialization;
-    return matchesSearch && matchesFilter;
-  });
+  // Form Components
+  const LawyerForm = ({ lawyer, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+      name: lawyer?.name || '',
+      specialization: lawyer?.specialization || '',
+      experience: lawyer?.experience || '',
+      rating: lawyer?.rating || 4.5,
+      location: lawyer?.location || '',
+      price: lawyer?.price || '',
+      image: lawyer?.image || '👨‍⚖️',
+      about: lawyer?.about || '',
+      languages: lawyer?.languages?.join(', ') || '',
+      education: lawyer?.education || '',
+      achievements: lawyer?.achievements?.join(', ') || '',
+      reviews: lawyer?.reviews || 0,
+      phone: lawyer?.phone || '',
+      email: lawyer?.email || ''
+    });
 
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      const processedData = {
+        ...formData,
+        languages: formData.languages.split(',').map(lang => lang.trim()),
+        achievements: formData.achievements.split(',').map(ach => ach.trim()),
+        rating: parseFloat(formData.rating),
+        reviews: parseInt(formData.reviews) || 0
+      };
+      onSave(processedData);
+    };
+
+    return (
+      <div>
+        <h2 className="text-xl font-bold mb-4">{lawyer ? 'Edit Lawyer' : 'Add New Lawyer'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Specialization"
+              value={formData.specialization}
+              onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Experience"
+              value={formData.experience}
+              onChange={(e) => setFormData({...formData, experience: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Rating"
+              min="1"
+              max="5"
+              step="0.1"
+              value={formData.rating}
+              onChange={(e) => setFormData({...formData, rating: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Location"
+              value={formData.location}
+              onChange={(e) => setFormData({...formData, location: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Price (e.g., ₹2,500/hour)"
+              value={formData.price}
+              onChange={(e) => setFormData({...formData, price: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <textarea
+            placeholder="About"
+            value={formData.about}
+            onChange={(e) => setFormData({...formData, about: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            rows={3}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Languages (comma separated)"
+            value={formData.languages}
+            onChange={(e) => setFormData({...formData, languages: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Education"
+            value={formData.education}
+            onChange={(e) => setFormData({...formData, education: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <input
+            type="text"
+            placeholder="Achievements (comma separated)"
+            value={formData.achievements}
+            onChange={(e) => setFormData({...formData, achievements: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
+          <div className="grid grid-cols-3 gap-4">
+            <input
+              type="text"
+              placeholder="Phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+              required
+            />
+            <input
+              type="number"
+              placeholder="Reviews Count"
+              value={formData.reviews}
+              onChange={(e) => setFormData({...formData, reviews: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex space-x-3">
+            <button
+              type="submit"
+              className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              {lawyer ? 'Update' : 'Add'} Lawyer
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  };
+
+  const BlogForm = ({ blog, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+      title: blog?.title || '',
+      excerpt: blog?.excerpt || '',
+      content: blog?.content || '',
+      author: blog?.author || '',
+      authorBio: blog?.authorBio || '',
+      readTime: blog?.readTime || '',
+      category: blog?.category || ''
+    });
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      onSave(formData);
+    };
+
+    return (
+      <div>
+        <h2 className="text-xl font-bold mb-4">{blog ? 'Edit Blog Post' : 'Add New Blog Post'}</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Title"
+            value={formData.title}
+            onChange={(e) => setFormData({...formData, title: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            required
+          />
+          <textarea
+            placeholder="Excerpt"
+            value={formData.excerpt}
+            onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            rows={2}
+            required
+          />
+          <textarea
+            placeholder="Content"
+            value={formData.content}
+            onChange={(e) => setFormData({...formData, content: e.target.value})}
+            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+            rows={8}
+            required
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Author"
+              value={formData.author}
+              onChange={(e) => setFormData({...formData, author: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Category"
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Author Bio"
+              value={formData.authorBio}
+              onChange={(e) => setFormData({...formData, authorBio: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Read Time (e.g., 5 min read)"
+              value={formData.readTime}
+              onChange={(e) => setFormData({...formData, readTime: e.target.value})}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
+              required
+            />
+          </div>
+          <div className="flex space-x-3">
+            <button
+              type="submit"
+              className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition"
+            >
+              {blog ? 'Update' : 'Add'} Blog Post
+            </button>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  };
+
+  // Navigation Component
   const Navigation = () => (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -378,11 +481,10 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
           <div className="flex items-center space-x-2">
             <Scale className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Wakalatnama Beta Version
+              Wakalatnama
             </span>
           </div>
           
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             <button 
               onClick={() => setCurrentPage('home')}
@@ -412,9 +514,34 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
               <FileText className="h-4 w-4" />
               <span>Legal Blog</span>
             </button>
+            {isAdmin ? (
+              <>
+                <button 
+                  onClick={() => setCurrentPage('admin')}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${currentPage === 'admin' ? 'bg-red-100 text-red-600' : 'text-red-600 hover:text-red-700'}`}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Admin</span>
+                </button>
+                <button 
+                  onClick={handleAdminLogout}
+                  className="flex items-center space-x-1 px-3 py-2 rounded-lg text-red-600 hover:text-red-700 transition"
+                >
+                  <Shield className="h-4 w-4" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={() => setShowAdminLogin(true)}
+                className="flex items-center space-x-1 px-3 py-2 rounded-lg text-gray-600 hover:text-blue-600 transition"
+              >
+                <Settings className="h-4 w-4" />
+                <span>Admin</span>
+              </button>
+            )}
           </div>
 
-          {/* Mobile menu button */}
           <button 
             className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -423,7 +550,6 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
           </button>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t">
             <div className="px-2 pt-2 pb-3 space-y-1">
@@ -434,33 +560,449 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
                 Home
               </button>
               <button 
-                onClick={() => { setCurrentPage('lawyers'); setActiveTab('hire-lawyer'); setMobileMenuOpen(false); }}
+                onClick={() => { setCurrentPage('lawyers'); setMobileMenuOpen(false); }}
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               >
                 Hire Lawyer
               </button>
               <button 
-                onClick={() => { setCurrentPage('quiz'); setActiveTab('quiz'); setMobileMenuOpen(false); }}
+                onClick={() => { setCurrentPage('quiz'); setMobileMenuOpen(false); }}
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               >
                 Law Quiz
               </button>
               <button 
-                onClick={() => { setCurrentPage('blog'); setActiveTab('blog'); setMobileMenuOpen(false); }}
+                onClick={() => { setCurrentPage('blog'); setMobileMenuOpen(false); }}
                 className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50"
               >
                 Legal Blog
               </button>
+              {isAdmin ? (
+                <>
+                  <button 
+                    onClick={() => { setCurrentPage('admin'); setMobileMenuOpen(false); }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Admin Panel
+                  </button>
+                  <button 
+                    onClick={() => { handleAdminLogout(); setMobileMenuOpen(false); }}
+                    className="block w-full text-left px-3 py-2 rounded-md text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    Admin Logout
+                  </button>
+                </>
+              ) : (
+                <button 
+                  onClick={() => { setShowAdminLogin(true); setMobileMenuOpen(false); }}
+                  className="block w-full text-left px-3 py-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                >
+                  Admin Login
+                </button>
+              )}
             </div>
           </div>
         )}
       </div>
+
+      {showAdminLogin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-800">Admin Login</h2>
+              <button 
+                onClick={() => setShowAdminLogin(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Admin Password
+                </label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter admin password"
+                  onKeyPress={(e) => e.key === 'Enter' && handleAdminLogin()}
+                />
+              </div>
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleAdminLogin}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => setShowAdminLogin(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-xs text-blue-700 text-center font-medium">
+                  Demo Password: wakalatnama2024
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 
+  // Admin Dashboard Component
+  const AdminDashboard = () => (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Admin Dashboard</h1>
+          <p className="text-gray-600">Manage lawyers, quizzes, and blog posts</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Total Lawyers</p>
+                <p className="text-3xl font-bold text-blue-600">{lawyers.length}</p>
+              </div>
+              <UserCheck className="h-12 w-12 text-blue-600" />
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Quiz Questions</p>
+                <p className="text-3xl font-bold text-indigo-600">
+                  {Object.values(quizQuestions).reduce((acc, questions) => acc + questions.length, 0)}
+                </p>
+              </div>
+              <BookOpen className="h-12 w-12 text-indigo-600" />
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Blog Posts</p>
+                <p className="text-3xl font-bold text-purple-600">{blogPosts.length}</p>
+              </div>
+              <FileText className="h-12 w-12 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => setAdminSection('lawyers')}
+              className={`px-6 py-3 rounded-lg font-medium transition ${
+                adminSection === 'lawyers' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Manage Lawyers
+            </button>
+            <button
+              onClick={() => setAdminSection('blogs')}
+              className={`px-6 py-3 rounded-lg font-medium transition ${
+                adminSection === 'blogs' 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Manage Blogs
+            </button>
+            <button
+              onClick={() => setAdminSection('quizzes')}
+              className={`px-6 py-3 rounded-lg font-medium transition ${
+                adminSection === 'quizzes' 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Manage Quizzes
+            </button>
+          </div>
+        </div>
+
+        {adminSection === 'lawyers' && (
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-800">Manage Lawyers</h2>
+                <button
+                  onClick={() => { setEditingItem(null); setShowForm(true); }}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Lawyer</span>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {lawyers.map(lawyer => (
+                  <div key={lawyer.id} className="border rounded-lg p-4 hover:shadow-md transition">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="text-3xl">{lawyer.image}</div>
+                        <div>
+                          <h3 className="font-semibold text-gray-800">{lawyer.name}</h3>
+                          <p className="text-blue-600">{lawyer.specialization}</p>
+                          <div className="flex items-center space-x-4 text-sm text-gray-600">
+                            <span>{lawyer.experience}</span>
+                            <span>{lawyer.location}</span>
+                            <span className="flex items-center space-x-1">
+                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                              <span>{lawyer.rating}</span>
+                            </span>
+                            <span>{lawyer.price}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => { setEditingItem(lawyer); setShowForm(true); }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Edit Lawyer"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this lawyer?')) {
+                              setLawyers(lawyers.filter(l => l.id !== lawyer.id));
+                            }
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          title="Delete Lawyer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {adminSection === 'blogs' && (
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-800">Manage Blog Posts</h2>
+                <button
+                  onClick={() => { setEditingItem(null); setShowForm(true); }}
+                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center space-x-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Blog Post</span>
+                </button>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                {blogPosts.map(blog => (
+                  <div key={blog.id} className="border rounded-lg p-4 hover:shadow-md transition">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800 mb-2">{blog.title}</h3>
+                        <p className="text-gray-600 text-sm mb-2">{blog.excerpt}</p>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>{blog.author}</span>
+                          <span>{blog.category}</span>
+                          <span>{blog.date}</span>
+                          <span>{blog.readTime}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => { setEditingItem(blog); setShowForm(true); }}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Edit Blog Post"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (window.confirm('Are you sure you want to delete this blog post?')) {
+                              setBlogPosts(blogPosts.filter(b => b.id !== blog.id));
+                            }
+                          }}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          title="Delete Blog Post"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {adminSection === 'quizzes' && (
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Manage Quiz Questions</h2>
+            </div>
+            <div className="p-6">
+              <div className="grid gap-6">
+                {quizCategories.map(category => (
+                  <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-lg flex items-center space-x-2">
+                        <span className="text-2xl">{category.icon}</span>
+                        <span>{category.name}</span>
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
+                          {(quizQuestions[category.id] || []).length} questions
+                        </span>
+                      </h3>
+                      <button
+                        onClick={() => {
+                          const question = prompt('Enter question:');
+                          if (question) {
+                            const option1 = prompt('Option 1:');
+                            const option2 = prompt('Option 2:');
+                            const option3 = prompt('Option 3:');
+                            const option4 = prompt('Option 4:');
+                            const correct = parseInt(prompt('Correct option (0-3):'));
+                            const explanation = prompt('Explanation:');
+                            
+                            if (option1 && option2 && option3 && option4 && explanation && correct >= 0 && correct <= 3) {
+                              const newQuestion = {
+                                question,
+                                options: [option1, option2, option3, option4],
+                                correct,
+                                explanation
+                              };
+                              
+                              setQuizQuestions({
+                                ...quizQuestions,
+                                [category.id]: [...(quizQuestions[category.id] || []), newQuestion]
+                              });
+                            }
+                          }
+                        }}
+                        className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition flex items-center space-x-1"
+                      >
+                        <Plus className="h-3 w-3" />
+                        <span>Add Question</span>
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {(quizQuestions[category.id] || []).map((question, index) => (
+                        <div key={index} className="bg-white rounded p-3 border">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium mb-2">
+                                <span className="text-gray-500">Q{index + 1}:</span> {question.question}
+                              </p>
+                              <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                {question.options.map((option, optIndex) => (
+                                  <div key={optIndex} className={`p-1 rounded ${optIndex === question.correct ? 'bg-green-100 text-green-700 font-medium' : ''}`}>
+                                    {String.fromCharCode(65 + optIndex)}: {option}
+                                  </div>
+                                ))}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-2">
+                                <strong>Explanation:</strong> {question.explanation}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this question?')) {
+                                  setQuizQuestions({
+                                    ...quizQuestions,
+                                    [category.id]: quizQuestions[category.id].filter((_, i) => i !== index)
+                                  });
+                                }
+                              }}
+                              className="ml-3 p-1 text-red-600 hover:bg-red-50 rounded transition"
+                              title="Delete Question"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Admin Forms Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-screen overflow-y-auto">
+            {adminSection === 'lawyers' && (
+              <LawyerForm 
+                lawyer={editingItem}
+                onSave={(data) => {
+                  if (editingItem) {
+                    setLawyers(lawyers.map(l => l.id === editingItem.id ? {...l, ...data} : l));
+                  } else {
+                    const newLawyer = {
+                      ...data,
+                      id: Math.max(...lawyers.map(l => l.id), 0) + 1
+                    };
+                    setLawyers([...lawyers, newLawyer]);
+                  }
+                  setShowForm(false);
+                  setEditingItem(null);
+                }}
+                onCancel={() => { setShowForm(false); setEditingItem(null); }}
+              />
+            )}
+            {adminSection === 'blogs' && (
+              <BlogForm 
+                blog={editingItem}
+                onSave={(data) => {
+                  if (editingItem) {
+                    setBlogPosts(blogPosts.map(b => b.id === editingItem.id ? {...b, ...data} : b));
+                  } else {
+                    const newBlog = {
+                      ...data,
+                      id: Math.max(...blogPosts.map(b => b.id), 0) + 1,
+                      date: new Date().toLocaleDateString('en-IN', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })
+                    };
+                    setBlogPosts([...blogPosts, newBlog]);
+                  }
+                  setShowForm(false);
+                  setEditingItem(null);
+                }}
+                onCancel={() => { setShowForm(false); setEditingItem(null); }}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // HomePage component
   const HomePage = () => (
     <div className="min-h-screen">
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
@@ -491,210 +1033,27 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Why Choose Wakalatnama?</h2>
-            <p className="text-xl text-gray-600">Your one-stop solution for all legal needs</p>
-          </div>
-
-          {/* Tabbed Interface */}
-          <div className="max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row bg-gray-100 rounded-lg p-2 mb-8">
-              <button
-                onClick={() => setActiveTab('hire-lawyer')}
-                className={`flex-1 px-6 py-3 rounded-md text-center font-semibold transition ${
-                  activeTab === 'hire-lawyer' 
-                    ? 'bg-white text-blue-600 shadow-md' 
-                    : 'text-gray-600 hover:text-blue-600'
-                }`}
-              >
-                <UserCheck className="h-5 w-5 mx-auto mb-2" />
-                Hire Lawyers
-              </button>
-              <button
-                onClick={() => setActiveTab('quiz')}
-                className={`flex-1 px-6 py-3 rounded-md text-center font-semibold transition ${
-                  activeTab === 'quiz' 
-                    ? 'bg-white text-indigo-600 shadow-md' 
-                    : 'text-gray-600 hover:text-indigo-600'
-                }`}
-              >
-                <BookOpen className="h-5 w-5 mx-auto mb-2" />
-                Law Quizzes
-              </button>
-              <button
-                onClick={() => setActiveTab('blog')}
-                className={`flex-1 px-6 py-3 rounded-md text-center font-semibold transition ${
-                  activeTab === 'blog' 
-                    ? 'bg-white text-purple-600 shadow-md' 
-                    : 'text-gray-600 hover:text-purple-600'
-                }`}
-              >
-                <FileText className="h-5 w-5 mx-auto mb-2" />
-                Legal Blog
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === 'hire-lawyer' && (
-              <div className="bg-blue-50 rounded-lg p-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Find Qualified Lawyers</h3>
-                    <ul className="space-y-3 text-gray-600 mb-6">
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Browse verified lawyer profiles</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Compare ratings and specializations</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Book consultations instantly</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Transparent pricing ₹2,000-₹3,000/hour</span>
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => { setCurrentPage('lawyers'); setActiveTab('hire-lawyer'); }}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-                    >
-                      Browse Lawyers
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {lawyers.slice(0, 4).map(lawyer => (
-                      <div key={lawyer.id} className="bg-white p-4 rounded-lg shadow-sm">
-                        <div className="text-3xl mb-2">{lawyer.image}</div>
-                        <h4 className="font-semibold text-sm">{lawyer.name}</h4>
-                        <p className="text-xs text-gray-600">{lawyer.specialization}</p>
-                        <div className="flex items-center space-x-1 mt-1">
-                          <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                          <span className="text-xs">{lawyer.rating}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'quiz' && (
-              <div className="bg-indigo-50 rounded-lg p-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Test Your Legal Knowledge</h3>
-                    <ul className="space-y-3 text-gray-600 mb-6">
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>Comprehensive quiz categories</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>30-minute timed sessions</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>Detailed explanations</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>Grade scoring and progress tracking</span>
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => { setCurrentPage('quiz'); setActiveTab('quiz'); }}
-                      className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
-                    >
-                      Start Quiz
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {quizCategories.slice(0, 4).map(category => (
-                      <div key={category.id} className="bg-white p-4 rounded-lg shadow-sm text-center">
-                        <div className="text-3xl mb-2">{category.icon}</div>
-                        <h4 className="font-semibold text-sm">{category.name}</h4>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'blog' && (
-              <div className="bg-purple-50 rounded-lg p-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Stay Updated with Legal Insights</h3>
-                    <ul className="space-y-3 text-gray-600 mb-6">
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Expert legal analysis</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Latest law updates</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Practical legal guides</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Community discussions</span>
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => { setCurrentPage('blog'); setActiveTab('blog'); }}
-                      className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
-                    >
-                      Read Articles
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {blogPosts.slice(0, 2).map(post => (
-                      <div key={post.id} className="bg-white p-4 rounded-lg shadow-sm">
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-2">{post.title}</h4>
-                        <p className="text-xs text-gray-600 mb-2">{post.excerpt}</p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{post.author}</span>
-                          <span>{post.readTime}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
+      {/* Quick Stats */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold mb-2">1000+</div>
+              <div className="text-4xl font-bold mb-2">{lawyers.length}+</div>
               <div className="text-blue-100">Verified Lawyers</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">50,000+</div>
-              <div className="text-blue-100">Cases Resolved</div>
+              <div className="text-4xl font-bold mb-2">
+                {Object.values(quizQuestions).reduce((acc, questions) => acc + questions.length, 0)}+
+              </div>
+              <div className="text-blue-100">Quiz Questions</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">25,000+</div>
-              <div className="text-blue-100">Quiz Attempts</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold mb-2">500+</div>
+              <div className="text-4xl font-bold mb-2">{blogPosts.length}+</div>
               <div className="text-blue-100">Legal Articles</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold mb-2">{isAdmin ? '🔧' : '👥'}</div>
+              <div className="text-blue-100">{isAdmin ? 'Admin Mode' : 'Happy Users'}</div>
             </div>
           </div>
         </div>
@@ -702,50 +1061,17 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
     </div>
   );
 
+  // LawyersPage
   const LawyersPage = () => (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">Find Qualified Lawyers</h1>
-          <p className="text-gray-600">Connect with experienced legal professionals across India</p>
+          <p className="text-gray-600">Connect with experienced legal professionals</p>
         </div>
 
-        {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <input
-                type="text"
-                placeholder="Search lawyers by name, specialization, or location..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="relative">
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <select
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-                value={filterSpecialization}
-                onChange={(e) => setFilterSpecialization(e.target.value)}
-              >
-                <option value="">All Specializations</option>
-                <option value="Criminal Law">Criminal Law</option>
-                <option value="Family Law">Family Law</option>
-                <option value="Corporate Law">Corporate Law</option>
-                <option value="Property Law">Property Law</option>
-              </select>
-            </div>
-            <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
-              Search
-            </button>
-          </div>
-        </div>
-
-        {/* Lawyers Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredLawyers.map(lawyer => (
+          {lawyers.map(lawyer => (
             <div key={lawyer.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6">
               <div className="flex items-start space-x-4 mb-4">
                 <div className="text-4xl">{lawyer.image}</div>
@@ -787,684 +1113,70 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
     </div>
   );
 
-  const LawyerProfile = () => (
-    <div className="min-h-screen bg-gray-50 py-8">
+  // QuizPage
+  const QuizPage = () => (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 py-8">
       <div className="container mx-auto px-4">
-        <button 
-          onClick={() => setSelectedLawyer(null)}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to Lawyers</span>
-        </button>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">Test Your Legal Knowledge</h1>
+          <p className="text-xl text-gray-600">Choose a category and challenge yourself</p>
+        </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Profile Card */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-              <div className="text-center mb-6">
-                <div className="text-6xl mb-4">{selectedLawyer.image}</div>
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">{selectedLawyer.name}</h1>
-                <p className="text-blue-600 font-semibold mb-2">{selectedLawyer.specialization}</p>
-                <div className="flex items-center justify-center space-x-1 mb-4">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="font-semibold">{selectedLawyer.rating}</span>
-                  <span className="text-gray-600">({selectedLawyer.reviews} reviews)</span>
-                </div>
-                <div className="text-2xl font-bold text-green-600 mb-4">{selectedLawyer.price}</div>
-              </div>
-
-              <div className="space-y-3">
-                <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>Book Consultation</span>
-                </button>
-                <button className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition font-medium flex items-center justify-center space-x-2">
-                  <MessageCircle className="h-5 w-5" />
-                  <span>Send Message</span>
-                </button>
-                <button className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-medium flex items-center justify-center space-x-2">
-                  <Video className="h-5 w-5" />
-                  <span>Video Call</span>
-                </button>
-              </div>
-
-              <div className="mt-6 pt-6 border-t space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-600">{selectedLawyer.phone}</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-600">{selectedLawyer.email}</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-600">{selectedLawyer.location}</span>
-                </div>
-              </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {quizCategories.map(category => (
+            <div key={category.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-8 text-center">
+              <div className="text-6xl mb-4">{category.icon}</div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4">{category.name}</h3>
+              <p className="text-gray-600 mb-6">
+                {(quizQuestions[category.id] || []).length} questions available
+              </p>
+              <button
+                onClick={() => {
+                  if (quizQuestions[category.id] && quizQuestions[category.id].length > 0) {
+                    startQuiz(category.id);
+                  } else {
+                    alert('No questions available for this category yet!');
+                  }
+                }}
+                className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
+              >
+                Start Quiz
+              </button>
             </div>
-          </div>
-
-          {/* Profile Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* About */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">About</h2>
-              <p className="text-gray-600 mb-4">{selectedLawyer.about}</p>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-2">Experience</h3>
-                  <p className="text-gray-600">{selectedLawyer.experience}</p>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-2">Languages</h3>
-                  <p className="text-gray-600">{selectedLawyer.languages.join(', ')}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Education */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Education</h2>
-              <p className="text-gray-600">{selectedLawyer.education}</p>
-            </div>
-
-            {/* Achievements */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Achievements</h2>
-              <ul className="space-y-2">
-                {selectedLawyer.achievements.map((achievement, index) => (
-                  <li key={index} className="flex items-center space-x-3">
-                    <Award className="h-5 w-5 text-yellow-500" />
-                    <span className="text-gray-600">{achievement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Reviews */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Client Reviews</h2>
-              <div className="space-y-4">
-                <div className="border-l-4 border-blue-500 pl-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600">5.0</span>
-                  </div>
-                  <p className="text-gray-600 mb-2">"Excellent lawyer with deep knowledge of criminal law. Handled my case professionally and got the best outcome."</p>
-                  <p className="text-sm text-gray-500">- Rahul Sharma</p>
-                </div>
-                <div className="border-l-4 border-green-500 pl-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <div className="flex text-yellow-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-current" />
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600">5.0</span>
-                  </div>
-                  <p className="text-gray-600 mb-2">"Very responsive and knowledgeable. Explained everything clearly and kept me informed throughout the process."</p>
-                  <p className="text-sm text-gray-500">- Priya Patel</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
   );
-
-  const QuizPage = () => {
-    if (quizState.started && !quizState.completed) {
-      const questions = quizQuestions[quizState.category] || [];
-      const currentQ = questions[quizState.currentQuestion];
-
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 py-8">
-          <div className="container mx-auto px-4 max-w-4xl">
-            {/* Quiz Header */}
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h1 className="text-2xl font-bold text-gray-800 capitalize">
-                  {quizState.category.replace('-', ' ')} Quiz
-                </h1>
-                <button 
-                  onClick={resetQuiz}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>Question {quizState.currentQuestion + 1} of {questions.length}</span>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4" />
-                  <span className="font-mono text-lg">{formatTime(quizState.timeLeft)}</span>
-                </div>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
-                <div 
-                  className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${((quizState.currentQuestion + 1) / questions.length) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Question */}
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <h2 className="text-xl font-semibold text-gray-800 mb-6">{currentQ?.question}</h2>
-              <div className="space-y-3">
-                {currentQ?.options.map((option, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuizAnswer(index)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition ${
-                      quizState.answers[quizState.currentQuestion] === index
-                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                        : 'border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'
-                    }`}
-                  >
-                    <span className="font-medium mr-3">{String.fromCharCode(65 + index)}.</span>
-                    {option}
-                  </button>
-                ))}
-              </div>
-              <div className="flex justify-between mt-8">
-                <button
-                  onClick={() => setQuizState(prev => ({ 
-                    ...prev, 
-                    currentQuestion: Math.max(0, prev.currentQuestion - 1) 
-                  }))}
-                  disabled={quizState.currentQuestion === 0}
-                  className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={nextQuestion}
-                  disabled={quizState.answers[quizState.currentQuestion] === undefined}
-                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {quizState.currentQuestion === questions.length - 1 ? 'Complete Quiz' : 'Next'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (quizState.completed) {
-      const questions = quizQuestions[quizState.category] || [];
-      return (
-        <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-indigo-50 py-8">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <div className="text-6xl mb-4">🎉</div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">Quiz Completed!</h1>
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg p-6 mb-6">
-                <div className="text-4xl font-bold mb-2">{quizState.score}%</div>
-                <div className="text-xl">Grade: {getGrade(quizState.score)}</div>
-              </div>
-              
-              <div className="grid md:grid-cols-3 gap-4 mb-8">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-gray-800">{questions.length}</div>
-                  <div className="text-gray-600">Total Questions</div>
-                </div>
-                <div className="bg-green-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-green-600">
-                    {quizState.answers.filter((ans, i) => ans === questions[i]?.correct).length}
-                  </div>
-                  <div className="text-gray-600">Correct Answers</div>
-                </div>
-                <div className="bg-red-50 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-red-600">
-                    {questions.length - quizState.answers.filter((ans, i) => ans === questions[i]?.correct).length}
-                  </div>
-                  <div className="text-gray-600">Incorrect Answers</div>
-                </div>
-              </div>
-
-              {/* Review Questions */}
-              <div className="text-left mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">Review Your Answers</h2>
-                <div className="space-y-4">
-                  {questions.map((question, index) => (
-                    <div key={index} className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Q{index + 1}: {question.question}</h3>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm text-gray-600 mb-1">Your Answer:</p>
-                          <p className={`font-medium ${
-                            quizState.answers[index] === question.correct 
-                              ? 'text-green-600' 
-                              : 'text-red-600'
-                          }`}>
-                            {question.options[quizState.answers[index]] || 'Not answered'}
-                            {quizState.answers[index] === question.correct ? ' ✓' : ' ✗'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-600 mb-1">Correct Answer:</p>
-                          <p className="font-medium text-green-600">
-                            {question.options[question.correct]} ✓
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-2 p-3 bg-blue-50 rounded text-sm">
-                        <strong>Explanation:</strong> {question.explanation}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button
-                  onClick={resetQuiz}
-                  className="px-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
-                >
-                  Take Another Quiz
-                </button>
-                <button
-                  onClick={() => startQuiz(quizState.category)}
-                  className="px-8 py-3 border border-indigo-600 text-indigo-600 rounded-lg hover:bg-indigo-50 transition font-medium"
-                >
-                  Retake This Quiz
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 py-8">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">Test Your Legal Knowledge</h1>
-            <p className="text-xl text-gray-600">Choose a category and challenge yourself with our comprehensive law quizzes</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {quizCategories.map(category => (
-              <div key={category.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-8 text-center">
-                <div className="text-6xl mb-4">{category.icon}</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4">{category.name}</h3>
-                <p className="text-gray-600 mb-6">
-                  Test your knowledge in {category.name.toLowerCase()} with our comprehensive quiz questions.
-                </p>
-                <button
-                  onClick={() => startQuiz(category.id)}
-                  className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
-                >
-                  Start Quiz
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="max-w-4xl mx-auto mt-12 bg-white rounded-lg shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">How It Works</h2>
-            <div className="grid md:grid-cols-4 gap-6">
-              <div className="text-center">
-                <div className="bg-indigo-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <BookOpen className="h-8 w-8 text-indigo-600" />
-                </div>
-                <h3 className="font-semibold mb-2">Choose Category</h3>
-                <p className="text-sm text-gray-600">Select from 6 different law categories</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-blue-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Clock className="h-8 w-8 text-blue-600" />
-                </div>
-                <h3 className="font-semibold mb-2">30 Minutes</h3>
-                <p className="text-sm text-gray-600">Complete the quiz within the time limit</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-green-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <CheckCircle className="h-8 w-8 text-green-600" />
-                </div>
-                <h3 className="font-semibold mb-2">Get Results</h3>
-                <p className="text-sm text-gray-600">Receive detailed feedback and grades</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-purple-100 rounded-full p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <Award className="h-8 w-8 text-purple-600" />
-                </div>
-                <h3 className="font-semibold mb-2">Review & Learn</h3>
-                <p className="text-sm text-gray-600">Study explanations for each question</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const BlogPage = () => (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">Legal Insights & Updates</h1>
-          <p className="text-gray-600">Stay informed with the latest legal developments and expert analysis</p>
+          <p className="text-gray-600">Stay informed with expert legal analysis</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Featured Article */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
-              <div className="p-8">
-                <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-                  Featured Article
-                </span>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">{blogPosts[0].title}</h2>
-                <p className="text-gray-600 mb-4">{blogPosts[0].excerpt}</p>
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span>{blogPosts[0].author}</span>
-                  <span>{blogPosts[0].date} • {blogPosts[0].readTime}</span>
-                </div>
-                <button 
-                  onClick={() => setSelectedBlog(blogPosts[0])}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-                >
-                  Read Full Article
-                </button>
+        <div className="grid lg:grid-cols-2 gap-6">
+          {blogPosts.map(post => (
+            <div key={post.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition">
+              <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                {post.category}
+              </span>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">{post.title}</h2>
+              <p className="text-gray-600 mb-4">{post.excerpt}</p>
+              <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                <span>{post.author}</span>
+                <span>{post.date} • {post.readTime}</span>
               </div>
-            </div>
-
-            {/* Recent Articles */}
-            <div className="space-y-6">
-              {blogPosts.slice(1).map(post => (
-                <div key={post.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-1">
-                      <span className="inline-block bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-medium mb-2">
-                        {post.category}
-                      </span>
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2 hover:text-blue-600 cursor-pointer"
-                          onClick={() => setSelectedBlog(post)}>
-                        {post.title}
-                      </h3>
-                      <p className="text-gray-600 mb-3">{post.excerpt}</p>
-                      <div className="flex items-center justify-between text-sm text-gray-500">
-                        <span>{post.author}</span>
-                        <span>{post.date} • {post.readTime}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Newsletter Signup */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-3">Stay Updated</h3>
-              <p className="mb-4 text-blue-100">Get the latest legal insights delivered to your inbox</p>
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="w-full px-4 py-2 rounded-lg text-gray-800 mb-3"
-              />
-              <button className="w-full bg-white text-blue-600 py-2 rounded-lg hover:bg-gray-100 transition font-medium">
-                Subscribe
+              <button 
+                onClick={() => setSelectedBlog(post)}
+                className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition font-medium"
+              >
+                Read Article
               </button>
             </div>
-
-            {/* Categories */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Categories</h3>
-              <div className="space-y-2">
-                {['Constitutional Law', 'Criminal Law', 'Family Law', 'Corporate Law', 'Property Law', 'Consumer Rights'].map(category => (
-                  <div key={category} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-                    <span className="text-gray-600 hover:text-blue-600 cursor-pointer">{category}</span>
-                    <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
-                      {Math.floor(Math.random() * 20) + 5}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Comments */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Recent Discussions</h3>
-              <div className="space-y-4">
-                <div className="border-l-4 border-blue-500 pl-3">
-                  <p className="text-sm text-gray-600 mb-1">
-                    "Very informative article about consumer rights..."
-                  </p>
-                  <p className="text-xs text-gray-500">- Amit Kumar on Consumer Rights</p>
-                </div>
-                <div className="border-l-4 border-green-500 pl-3">
-                  <p className="text-sm text-gray-600 mb-1">
-                    "The RERA updates are very helpful for property buyers..."
-                  </p>
-                  <p className="text-xs text-gray-500">- Priya Singh on Property Law</p>
-                </div>
-                <div className="border-l-4 border-purple-500 pl-3">
-                  <p className="text-sm text-gray-600 mb-1">
-                    "Online FIR filing process explained clearly..."
-                  </p>
-                  <p className="text-xs text-gray-500">- Rajesh Sharma on Criminal Law</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const BlogPost = () => (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <button 
-          onClick={() => setSelectedBlog(null)}
-          className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 mb-6"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to Blog</span>
-        </button>
-
-        <div className="max-w-4xl mx-auto">
-          <article className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="p-8">
-              <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium mb-4">
-                {selectedBlog.category}
-              </span>
-              <h1 className="text-4xl font-bold text-gray-800 mb-4">{selectedBlog.title}</h1>
-              
-              <div className="flex items-center space-x-6 text-gray-600 mb-8 pb-8 border-b">
-                <div className="flex items-center space-x-2">
-                  <User className="h-5 w-5" />
-                  <span>{selectedBlog.author}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5" />
-                  <span>{selectedBlog.date}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-5 w-5" />
-                  <span>{selectedBlog.readTime}</span>
-                </div>
-              </div>
-
-              {/* Table of Contents */}
-              <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Table of Contents</h2>
-                <ul className="space-y-2">
-                  {selectedBlog.content.match(/### \d+\. [^\n]+/g)?.map((heading, index) => (
-                    <li key={index}>
-                      <a 
-                        href={`#section-${index}`} 
-                        className="text-blue-600 hover:text-blue-700 text-sm"
-                      >
-                        {heading.replace('### ', '')}
-                      </a>
-                    </li>
-                  )) || []}
-                </ul>
-              </div>
-
-              {/* Article Content */}
-              <div className="prose prose-lg max-w-none">
-                {selectedBlog.content.split('\n\n').map((paragraph, index) => {
-                  if (paragraph.startsWith('## ')) {
-                    return (
-                      <h2 key={index} className="text-2xl font-bold text-gray-800 mt-8 mb-4">
-                        {paragraph.replace('## ', '')}
-                      </h2>
-                    );
-                  } else if (paragraph.startsWith('### ')) {
-                    return (
-                      <h3 key={index} className="text-xl font-semibold text-gray-800 mt-6 mb-3" id={`section-${index}`}>
-                        {paragraph.replace('### ', '')}
-                      </h3>
-                    );
-                  } else if (paragraph.startsWith('- ')) {
-                    const items = paragraph.split('\n').filter(item => item.startsWith('- '));
-                    return (
-                      <ul key={index} className="list-disc list-inside space-y-2 mb-4">
-                        {items.map((item, i) => (
-                          <li key={i} className="text-gray-600">{item.replace('- ', '')}</li>
-                        ))}
-                      </ul>
-                    );
-                  } else if (paragraph.trim()) {
-                    return (
-                      <p key={index} className="text-gray-600 mb-4 leading-relaxed">
-                        {paragraph}
-                      </p>
-                    );
-                  }
-                  return null;
-                })}
-              </div>
-
-              {/* Author Bio */}
-              <div className="bg-blue-50 rounded-lg p-6 mt-12">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-blue-600 text-white rounded-full p-4">
-                    <User className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">About {selectedBlog.author}</h3>
-                    <p className="text-gray-600">{selectedBlog.authorBio}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Sharing */}
-              <div className="border-t pt-8 mt-8">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Share this article</h3>
-                <div className="flex space-x-4">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    Share on Twitter
-                  </button>
-                  <button className="bg-blue-800 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition">
-                    Share on LinkedIn
-                  </button>
-                  <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                    Share on WhatsApp
-                  </button>
-                </div>
-              </div>
-
-              {/* Comments Section */}
-              <div className="border-t pt-8 mt-8">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6">Comments</h3>
-                
-                {/* Comment Form */}
-                <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-4">Leave a Comment</h4>
-                  <div className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <input
-                        type="text"
-                        placeholder="Your Name"
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Your Email"
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <textarea
-                      rows={4}
-                      placeholder="Your Comment"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    ></textarea>
-                    <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">
-                      Post Comment
-                    </button>
-                  </div>
-                </div>
-
-                {/* Sample Comments */}
-                <div className="space-y-6">
-                  <div className="border-l-4 border-blue-500 pl-6">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <div className="bg-gray-300 rounded-full p-2">
-                        <User className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-gray-800">Amit Kumar</h5>
-                        <p className="text-sm text-gray-500">March 16, 2024</p>
-                      </div>
-                    </div>
-                    <p className="text-gray-600">
-                      Very informative article! The explanation about consumer rights under the new act is comprehensive and easy to understand. Thank you for sharing this valuable information.
-                    </p>
-                  </div>
-                  
-                  <div className="border-l-4 border-green-500 pl-6">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <div className="bg-gray-300 rounded-full p-2">
-                        <User className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h5 className="font-semibold text-gray-800">Priya Singh</h5>
-                        <p className="text-sm text-gray-500">March 15, 2024</p>
-                      </div>
-                    </div>
-                    <p className="text-gray-600">
-                      I had no idea about the e-Daakhil portal for filing complaints online. This will be very helpful for consumers. Could you also write about the time limits for filing complaints?
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Related Articles */}
-              <div className="border-t pt-8 mt-8">
-                <h3 className="text-2xl font-semibold text-gray-800 mb-6">Related Articles</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {blogPosts.filter(post => post.id !== selectedBlog.id).slice(0, 2).map(post => (
-                    <div key={post.id} className="border rounded-lg p-4 hover:shadow-md transition cursor-pointer"
-                         onClick={() => setSelectedBlog(post)}>
-                      <h4 className="font-semibold text-gray-800 mb-2 hover:text-blue-600">{post.title}</h4>
-                      <p className="text-gray-600 text-sm mb-2">{post.excerpt}</p>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{post.author}</span>
-                        <span>{post.readTime}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </article>
+          ))}
         </div>
       </div>
     </div>
@@ -1475,56 +1187,28 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
       <Navigation />
       
       {currentPage === 'home' && <HomePage />}
-      
       {currentPage === 'lawyers' && !selectedLawyer && <LawyersPage />}
-      {currentPage === 'lawyers' && selectedLawyer && <LawyerProfile />}
-      
       {currentPage === 'quiz' && <QuizPage />}
-      
       {currentPage === 'blog' && !selectedBlog && <BlogPage />}
-      {currentPage === 'blog' && selectedBlog && <BlogPost />}
+      {currentPage === 'admin' && isAdmin && <AdminDashboard />}
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Scale className="h-8 w-8 text-blue-400" />
-                <span className="text-2xl font-bold">Wakalatnama</span>
-              </div>
-              <p className="text-gray-400 mb-4">
-                Your trusted legal partner for finding qualified lawyers, testing legal knowledge, and staying updated with Indian law.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">Find Lawyers</a></li>
-                <li><a href="#" className="hover:text-white transition">Legal Consultation</a></li>
-                <li><a href="#" className="hover:text-white transition">Law Quizzes</a></li>
-                <li><a href="#" className="hover:text-white transition">Legal Blog</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Legal Areas</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition">Criminal Law</a></li>
-                <li><a href="#" className="hover:text-white transition">Family Law</a></li>
-                <li><a href="#" className="hover:text-white transition">Corporate Law</a></li>
-                <li><a href="#" className="hover:text-white transition">Property Law</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <div className="space-y-2 text-gray-400">
-                <p>📧 contact@wakalatnama.in</p>
-                <p>📞 +91-11-4567-8900</p>
-                <p>📍 New Delhi, India</p>
-              </div>
-            </div>
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <Scale className="h-8 w-8 text-blue-400" />
+            <span className="text-2xl font-bold">Wakalatnama</span>
           </div>
-          <div className="border-t border-gray-700 pt-8 mt-8 text-center text-gray-400">
+          <p className="text-gray-400 mb-4">
+            Your trusted legal partner for finding qualified lawyers and staying updated with Indian law.
+          </p>
+          <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
+            <span>contact@wakalatnama.in</span>
+            <span>+91-11-4567-8900</span>
+            <span>New Delhi, India</span>
+            {isAdmin && <span className="text-red-400">Admin Mode Active</span>}
+          </div>
+          <div className="border-t border-gray-700 pt-4 mt-4">
             <p>&copy; 2024 Wakalatnama. All rights reserved. | Legal Services Platform for India</p>
           </div>
         </div>
@@ -1533,5 +1217,5 @@ Remember, filing false FIR is a punishable offense. Ensure all information is ac
   );
 };
 
-export default App;
-            
+export default App; 
+                
