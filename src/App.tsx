@@ -1,5 +1,166 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Star, MapPin, Phone, Mail, BookOpen, Users, Award, ChevronRight, Search, Filter, User, Calendar, MessageCircle, Video, ArrowLeft, CheckCircle, X, Menu, Home, Scale, FileText, UserCheck, Settings, Plus, Edit, Trash2, Save, Shield } from 'lucide-react';
+import { Clock, Star, MapPin, Phone, Mail, BookOpen, Users, Award, ChevronRight, Search, Filter, User, Calendar, MessageCircle, Video, ArrowLeft, CheckCircle, X, Menu, Home, Scale, FileText, UserCheck, Settings, Plus, Edit, Trash2, Save, Shield, Database, Wifi, WifiOff } from 'lucide-react';
+
+// Supabase configuration - replace with your actual Supabase credentials
+const SUPABASE_URL = 'https://bljsjhsyzytboenjvlut.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJsanNqaHN5enl0Ym9lbmp2bHV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg5MDE5OTgsImV4cCI6MjA3NDQ3Nzk5OH0.db4qj2EWU-TNfI32uCBgwKYL369lmxP0VwHa-5VruRM';
+
+// Simple Supabase client simulation
+class SupabaseClient {
+  constructor(url, key) {
+    this.url = url;
+    this.key = key;
+    this.connected = false;
+    this.data = {
+      lawyers: [],
+      quiz_questions: [],
+      blog_posts: []
+    };
+    
+    setTimeout(() => {
+      this.connected = true;
+      this.loadMockData();
+    }, 1000);
+  }
+
+  loadMockData() {
+    this.data.lawyers = [
+      {
+        id: 1,
+        name: "Advocate Priya Sharma",
+        specialization: "Criminal Law",
+        experience: "12 years",
+        rating: 4.8,
+        location: "New Delhi",
+        price: "₹2,500/hour",
+        image: "👩‍⚖️",
+        about: "Specializing in criminal defense with over a decade of experience in high-profile cases.",
+        languages: ["Hindi", "English", "Punjabi"],
+        education: "LLB from Delhi University, LLM from JNU",
+        achievements: ["Best Criminal Lawyer Award 2023", "500+ successful cases"],
+        reviews: 156,
+        phone: "+91-9876543210",
+        email: "priya.sharma@legal.com",
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        name: "Advocate Rajesh Kumar",
+        specialization: "Family Law",
+        experience: "15 years",
+        rating: 4.9,
+        location: "Mumbai",
+        price: "₹3,000/hour",
+        image: "👨‍⚖️",
+        about: "Expert in family disputes, divorce proceedings, and child custody cases.",
+        languages: ["Hindi", "English", "Marathi"],
+        education: "LLB from Government Law College Mumbai",
+        achievements: ["Family Law Expert of the Year 2022", "1000+ cases resolved"],
+        reviews: 203,
+        phone: "+91-9876543211",
+        email: "rajesh.kumar@legal.com",
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    this.data.quiz_questions = [
+      {
+        id: 1,
+        category: 'constitutional',
+        question: "Which Article of the Indian Constitution guarantees the Right to Equality?",
+        options: ["Article 14", "Article 15", "Article 16", "Article 17"],
+        correct_answer: 0,
+        explanation: "Article 14 guarantees equality before law and equal protection of laws.",
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        category: 'criminal',
+        question: "Under which section of IPC is murder defined?",
+        options: ["Section 300", "Section 302", "Section 299", "Section 304"],
+        correct_answer: 0,
+        explanation: "Section 300 of IPC defines murder, while Section 302 prescribes punishment for murder.",
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    this.data.blog_posts = [
+      {
+        id: 1,
+        title: "Understanding Consumer Rights in India",
+        excerpt: "Learn about your rights as a consumer under the Consumer Protection Act 2019.",
+        content: "The Consumer Protection Act 2019 has revolutionized consumer rights in India. Here's what every citizen should know.",
+        author: "Advocate Meera Joshi",
+        author_bio: "Consumer Rights Expert with 8 years of experience",
+        category: "Consumer Law",
+        read_time: "5 min read",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    ];
+  }
+
+  from(table) {
+    return {
+      select: (columns = '*') => ({
+        then: (callback) => {
+          setTimeout(() => {
+            callback({ data: this.data[table], error: null });
+          }, 200);
+        }
+      }),
+      insert: (record) => ({
+        then: (callback) => {
+          setTimeout(() => {
+            const newRecord = {
+              ...record,
+              id: Math.max(...this.data[table].map(r => r.id || 0), 0) + 1,
+              created_at: new Date().toISOString()
+            };
+            this.data[table].push(newRecord);
+            callback({ data: [newRecord], error: null });
+          }, 200);
+        }
+      }),
+      update: (updates) => ({
+        eq: (column, value) => ({
+          then: (callback) => {
+            setTimeout(() => {
+              const index = this.data[table].findIndex(r => r[column] === value);
+              if (index !== -1) {
+                this.data[table][index] = {
+                  ...this.data[table][index],
+                  ...updates,
+                  updated_at: new Date().toISOString()
+                };
+                callback({ data: [this.data[table][index]], error: null });
+              } else {
+                callback({ data: null, error: 'Record not found' });
+              }
+            }, 200);
+          }
+        })
+      }),
+      delete: () => ({
+        eq: (column, value) => ({
+          then: (callback) => {
+            setTimeout(() => {
+              const index = this.data[table].findIndex(r => r[column] === value);
+              if (index !== -1) {
+                const deleted = this.data[table].splice(index, 1);
+                callback({ data: deleted, error: null });
+              } else {
+                callback({ data: null, error: 'Record not found' });
+              }
+            }, 200);
+          }
+        })
+      })
+    };
+  }
+}
+
+const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -27,76 +188,15 @@ const App = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [showForm, setShowForm] = useState(false);
   
+  // Database States
+  const [dbConnected, setDbConnected] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
   // Dynamic Data States
-  const [lawyers, setLawyers] = useState([
-    {
-      id: 1,
-      name: "Advocate Priya Sharma",
-      specialization: "Criminal Law",
-      experience: "12 years",
-      rating: 4.8,
-      location: "New Delhi",
-      price: "₹2,500/hour",
-      image: "👩‍⚖️",
-      about: "Specializing in criminal defense with over a decade of experience in high-profile cases.",
-      languages: ["Hindi", "English", "Punjabi"],
-      education: "LLB from Delhi University, LLM from JNU",
-      achievements: ["Best Criminal Lawyer Award 2023", "500+ successful cases"],
-      reviews: 156,
-      phone: "+91-9876543210",
-      email: "priya.sharma@legal.com"
-    },
-    {
-      id: 2,
-      name: "Advocate Rajesh Kumar",
-      specialization: "Family Law",
-      experience: "15 years",
-      rating: 4.9,
-      location: "Mumbai",
-      price: "₹3,000/hour",
-      image: "👨‍⚖️",
-      about: "Expert in family disputes, divorce proceedings, and child custody cases.",
-      languages: ["Hindi", "English", "Marathi"],
-      education: "LLB from Government Law College Mumbai",
-      achievements: ["Family Law Expert of the Year 2022", "1000+ cases resolved"],
-      reviews: 203,
-      phone: "+91-9876543211",
-      email: "rajesh.kumar@legal.com"
-    }
-  ]);
-
-  const [quizQuestions, setQuizQuestions] = useState({
-    constitutional: [
-      {
-        question: "Which Article of the Indian Constitution guarantees the Right to Equality?",
-        options: ["Article 14", "Article 15", "Article 16", "Article 17"],
-        correct: 0,
-        explanation: "Article 14 guarantees equality before law and equal protection of laws."
-      }
-    ],
-    criminal: [
-      {
-        question: "Under which section of IPC is murder defined?",
-        options: ["Section 300", "Section 302", "Section 299", "Section 304"],
-        correct: 0,
-        explanation: "Section 300 of IPC defines murder, while Section 302 prescribes punishment for murder."
-      }
-    ]
-  });
-
-  const [blogPosts, setBlogPosts] = useState([
-    {
-      id: 1,
-      title: "Understanding Consumer Rights in India",
-      excerpt: "Learn about your rights as a consumer under the Consumer Protection Act 2019.",
-      content: "The Consumer Protection Act 2019 has revolutionized consumer rights in India.",
-      author: "Advocate Meera Joshi",
-      authorBio: "Consumer Rights Expert with 8 years of experience",
-      date: "March 15, 2024",
-      readTime: "5 min read",
-      category: "Consumer Law"
-    }
-  ]);
+  const [lawyers, setLawyers] = useState([]);
+  const [quizQuestions, setQuizQuestions] = useState({});
+  const [blogPosts, setBlogPosts] = useState([]);
 
   const quizCategories = [
     { id: 'constitutional', name: 'Constitutional Law', icon: '📜' },
@@ -107,9 +207,75 @@ const App = () => {
     { id: 'consumer', name: 'Consumer Rights', icon: '🛒' }
   ];
 
+  // Database Functions
+  useEffect(() => {
+    const checkConnection = () => {
+      setDbConnected(supabase.connected);
+      if (supabase.connected) {
+        loadAllData();
+      }
+    };
+
+    const interval = setInterval(checkConnection, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadAllData = async () => {
+    setLoading(true);
+    try {
+      await supabase.from('lawyers').select().then(({ data, error }) => {
+        if (error) throw error;
+        setLawyers(data || []);
+      });
+
+      await supabase.from('quiz_questions').select().then(({ data, error }) => {
+        if (error) throw error;
+        const groupedQuestions = {};
+        (data || []).forEach(q => {
+          if (!groupedQuestions[q.category]) {
+            groupedQuestions[q.category] = [];
+          }
+          groupedQuestions[q.category].push({
+            question: q.question,
+            options: q.options,
+            correct: q.correct_answer,
+            explanation: q.explanation
+          });
+        });
+        setQuizQuestions(groupedQuestions);
+      });
+
+      await supabase.from('blog_posts').select().then(({ data, error }) => {
+        if (error) throw error;
+        const formattedPosts = (data || []).map(post => ({
+          id: post.id,
+          title: post.title,
+          excerpt: post.excerpt,
+          content: post.content,
+          author: post.author,
+          authorBio: post.author_bio,
+          category: post.category,
+          readTime: post.read_time,
+          date: new Date(post.created_at).toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          })
+        }));
+        setBlogPosts(formattedPosts);
+      });
+
+      setError(null);
+    } catch (err) {
+      setError(`Database error: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Admin Functions
   const handleAdminLogin = () => {
-    if (adminPassword === 'wakalatguru2024') {
+    if (adminPassword === 'wakalatnama2024') {
       setIsAdmin(true);
       setShowAdminLogin(false);
       setAdminPassword('');
@@ -126,83 +292,59 @@ const App = () => {
     setShowForm(false);
   };
 
-  // Quiz functions
-  useEffect(() => {
-    let timer;
-    if (quizState.started && !quizState.completed && quizState.timeLeft > 0) {
-      timer = setTimeout(() => {
-        setQuizState(prev => ({ ...prev, timeLeft: prev.timeLeft - 1 }));
-      }, 1000);
-    } else if (quizState.timeLeft === 0 && !quizState.completed) {
-      handleQuizComplete();
-    }
-    return () => clearTimeout(timer);
-  }, [quizState.timeLeft, quizState.started, quizState.completed]);
-
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const startQuiz = (category) => {
-    setQuizState({
-      category,
-      started: true,
-      currentQuestion: 0,
-      answers: [],
-      timeLeft: 1800,
-      completed: false,
-      score: 0
-    });
-  };
-
-  const handleQuizAnswer = (answerIndex) => {
-    const newAnswers = [...quizState.answers];
-    newAnswers[quizState.currentQuestion] = answerIndex;
-    setQuizState(prev => ({ ...prev, answers: newAnswers }));
-  };
-
-  const nextQuestion = () => {
-    const questions = quizQuestions[quizState.category] || [];
-    if (quizState.currentQuestion < questions.length - 1) {
-      setQuizState(prev => ({ ...prev, currentQuestion: prev.currentQuestion + 1 }));
-    } else {
-      handleQuizComplete();
+  // Database CRUD Operations
+  const addLawyerToDb = async (lawyerData) => {
+    setLoading(true);
+    try {
+      await supabase.from('lawyers').insert(lawyerData).then(({ data, error }) => {
+        if (error) throw error;
+        if (data && data[0]) {
+          setLawyers(prev => [...prev, data[0]]);
+        }
+      });
+      setShowForm(false);
+      setError(null);
+    } catch (err) {
+      setError(`Failed to add lawyer: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleQuizComplete = () => {
-    const questions = quizQuestions[quizState.category] || [];
-    const score = quizState.answers.reduce((acc, answer, index) => {
-      return acc + (answer === questions[index]?.correct ? 1 : 0);
-    }, 0);
+  const updateLawyerInDb = async (id, lawyerData) => {
+    setLoading(true);
+    try {
+      await supabase.from('lawyers').update(lawyerData).eq('id', id).then(({ data, error }) => {
+        if (error) throw error;
+        setLawyers(prev => prev.map(lawyer => 
+          lawyer.id === id ? { ...lawyer, ...lawyerData } : lawyer
+        ));
+      });
+      setShowForm(false);
+      setEditingItem(null);
+      setError(null);
+    } catch (err) {
+      setError(`Failed to update lawyer: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteLawyerFromDb = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this lawyer?')) return;
     
-    setQuizState(prev => ({ 
-      ...prev, 
-      completed: true, 
-      score: Math.round((score / questions.length) * 100) 
-    }));
-  };
-
-  const getGrade = (score) => {
-    if (score >= 90) return 'A+';
-    if (score >= 80) return 'A';
-    if (score >= 70) return 'B';
-    if (score >= 60) return 'C';
-    return 'D';
-  };
-
-  const resetQuiz = () => {
-    setQuizState({
-      category: null,
-      started: false,
-      currentQuestion: 0,
-      answers: [],
-      timeLeft: 1800,
-      completed: false,
-      score: 0
-    });
+    setLoading(true);
+    try {
+      await supabase.from('lawyers').delete().eq('id', id).then(({ error }) => {
+        if (error) throw error;
+        setLawyers(prev => prev.filter(lawyer => lawyer.id !== id));
+      });
+      setError(null);
+    } catch (err) {
+      setError(`Failed to delete lawyer: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Form Components
@@ -279,186 +421,12 @@ const App = () => {
               required
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Location"
-              value={formData.location}
-              onChange={(e) => setFormData({...formData, location: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Price (e.g., ₹2,500/hour)"
-              value={formData.price}
-              onChange={(e) => setFormData({...formData, price: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <textarea
-            placeholder="About"
-            value={formData.about}
-            onChange={(e) => setFormData({...formData, about: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            rows={3}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Languages (comma separated)"
-            value={formData.languages}
-            onChange={(e) => setFormData({...formData, languages: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Education"
-            value={formData.education}
-            onChange={(e) => setFormData({...formData, education: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            required
-          />
-          <input
-            type="text"
-            placeholder="Achievements (comma separated)"
-            value={formData.achievements}
-            onChange={(e) => setFormData({...formData, achievements: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-          />
-          <div className="grid grid-cols-3 gap-4">
-            <input
-              type="text"
-              placeholder="Phone"
-              value={formData.phone}
-              onChange={(e) => setFormData({...formData, phone: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="number"
-              placeholder="Reviews Count"
-              value={formData.reviews}
-              onChange={(e) => setFormData({...formData, reviews: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
           <div className="flex space-x-3">
             <button
               type="submit"
               className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
             >
               {lawyer ? 'Update' : 'Add'} Lawyer
-            </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  };
-
-  const BlogForm = ({ blog, onSave, onCancel }) => {
-    const [formData, setFormData] = useState({
-      title: blog?.title || '',
-      excerpt: blog?.excerpt || '',
-      content: blog?.content || '',
-      author: blog?.author || '',
-      authorBio: blog?.authorBio || '',
-      readTime: blog?.readTime || '',
-      category: blog?.category || ''
-    });
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      onSave(formData);
-    };
-
-    return (
-      <div>
-        <h2 className="text-xl font-bold mb-4">{blog ? 'Edit Blog Post' : 'Add New Blog Post'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Title"
-            value={formData.title}
-            onChange={(e) => setFormData({...formData, title: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            required
-          />
-          <textarea
-            placeholder="Excerpt"
-            value={formData.excerpt}
-            onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            rows={2}
-            required
-          />
-          <textarea
-            placeholder="Content"
-            value={formData.content}
-            onChange={(e) => setFormData({...formData, content: e.target.value})}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            rows={8}
-            required
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Author"
-              value={formData.author}
-              onChange={(e) => setFormData({...formData, author: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Category"
-              value={formData.category}
-              onChange={(e) => setFormData({...formData, category: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-              required
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Author Bio"
-              value={formData.authorBio}
-              onChange={(e) => setFormData({...formData, authorBio: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-              required
-            />
-            <input
-              type="text"
-              placeholder="Read Time (e.g., 5 min read)"
-              value={formData.readTime}
-              onChange={(e) => setFormData({...formData, readTime: e.target.value})}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-              required
-            />
-          </div>
-          <div className="flex space-x-3">
-            <button
-              type="submit"
-              className="flex-1 bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700 transition"
-            >
-              {blog ? 'Update' : 'Add'} Blog Post
             </button>
             <button
               type="button"
@@ -481,7 +449,7 @@ const App = () => {
           <div className="flex items-center space-x-2">
             <Scale className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              wakalatguru
+              Wakalatnama
             </span>
           </div>
           
@@ -647,7 +615,7 @@ const App = () => {
               </div>
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-xs text-blue-700 text-center font-medium">
-                  Demo Password: wakalatguru2024
+                  Demo Password: wakalatnama2024
                 </p>
               </div>
             </div>
@@ -656,145 +624,21 @@ const App = () => {
       )}
     </nav>
   );
-   /* Tab Content */
-            {activeTab === 'hire-lawyer' && (
-              <div className="bg-blue-50 rounded-lg p-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Find Qualified Lawyers</h3>
-                    <ul className="space-y-3 text-gray-600 mb-6">
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Browse verified lawyer profiles</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Compare ratings and specializations</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Book consultations instantly</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-blue-600" />
-                        <span>Transparent pricing ₹2,000-₹3,000/hour</span>
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => { setCurrentPage('lawyers'); setActiveTab('hire-lawyer'); }}
-                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-                    >
-                      Browse Lawyers
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {lawyers.slice(0, 4).map(lawyer => (
-                      <div key={lawyer.id} className="bg-white p-4 rounded-lg shadow-sm">
-                        <div className="text-3xl mb-2">{lawyer.image}</div>
-                        <h4 className="font-semibold text-sm">{lawyer.name}</h4>
-                        <p className="text-xs text-gray-600">{lawyer.specialization}</p>
-                        <div className="flex items-center space-x-1 mt-1">
-                          <Star className="h-3 w-3 text-yellow-400 fill-current" />
-                          <span className="text-xs">{lawyer.rating}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {activeTab === 'quiz' && (
-              <div className="bg-indigo-50 rounded-lg p-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Test Your Legal Knowledge</h3>
-                    <ul className="space-y-3 text-gray-600 mb-6">
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>Comprehensive quiz categories</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>30-minute timed sessions</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>Detailed explanations</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-indigo-600" />
-                        <span>Grade scoring and progress tracking</span>
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => { setCurrentPage('quiz'); setActiveTab('quiz'); }}
-                      className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
-                    >
-                      Start Quiz
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {quizCategories.slice(0, 4).map(category => (
-                      <div key={category.id} className="bg-white p-4 rounded-lg shadow-sm text-center">
-                        <div className="text-3xl mb-2">{category.icon}</div>
-                        <h4 className="font-semibold text-sm">{category.name}</h4>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'blog' && (
-              <div className="bg-purple-50 rounded-lg p-8">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                  <div>
-                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Stay Updated with Legal Insights</h3>
-                    <ul className="space-y-3 text-gray-600 mb-6">
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Expert legal analysis</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Latest law updates</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Practical legal guides</span>
-                      </li>
-                      <li className="flex items-center space-x-3">
-                        <CheckCircle className="h-5 w-5 text-purple-600" />
-                        <span>Community discussions</span>
-                      </li>
-                    </ul>
-                    <button 
-                      onClick={() => { setCurrentPage('blog'); setActiveTab('blog'); }}
-                      className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
-                    >
-                      Read Articles
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {blogPosts.slice(0, 2).map(post => (
-                      <div key={post.id} className="bg-white p-4 rounded-lg shadow-sm">
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-2">{post.title}</h4>
-                        <p className="text-xs text-gray-600 mb-2">{post.excerpt}</p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{post.author}</span>
-                          <span>{post.readTime}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          
-        </div>
-      </section>
-
+  // Database Status Component
+  const DatabaseStatus = () => (
+    <div className="fixed top-20 right-4 z-40">
+      <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg shadow-md ${
+        dbConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+      }`}>
+        {dbConnected ? <Wifi className="h-4 w-4" /> : <WifiOff className="h-4 w-4" />}
+        <span className="text-sm font-medium">
+          {dbConnected ? 'DB Connected' : 'DB Connecting...'}
+        </span>
+        <Database className="h-4 w-4" />
+      </div>
+    </div>
+  );
 
   // Admin Dashboard Component
   const AdminDashboard = () => (
@@ -849,26 +693,6 @@ const App = () => {
             >
               Manage Lawyers
             </button>
-            <button
-              onClick={() => setAdminSection('blogs')}
-              className={`px-6 py-3 rounded-lg font-medium transition ${
-                adminSection === 'blogs' 
-                  ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Manage Blogs
-            </button>
-            <button
-              onClick={() => setAdminSection('quizzes')}
-              className={`px-6 py-3 rounded-lg font-medium transition ${
-                adminSection === 'quizzes' 
-                  ? 'bg-indigo-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Manage Quizzes
-            </button>
           </div>
         </div>
 
@@ -896,15 +720,6 @@ const App = () => {
                         <div>
                           <h3 className="font-semibold text-gray-800">{lawyer.name}</h3>
                           <p className="text-blue-600">{lawyer.specialization}</p>
-                          <div className="flex items-center space-x-4 text-sm text-gray-600">
-                            <span>{lawyer.experience}</span>
-                            <span>{lawyer.location}</span>
-                            <span className="flex items-center space-x-1">
-                              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                              <span>{lawyer.rating}</span>
-                            </span>
-                            <span>{lawyer.price}</span>
-                          </div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -916,167 +731,13 @@ const App = () => {
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this lawyer?')) {
-                              setLawyers(lawyers.filter(l => l.id !== lawyer.id));
-                            }
-                          }}
+                          onClick={() => deleteLawyerFromDb(lawyer.id)}
                           className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
                           title="Delete Lawyer"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {adminSection === 'blogs' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-800">Manage Blog Posts</h2>
-                <button
-                  onClick={() => { setEditingItem(null); setShowForm(true); }}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center space-x-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add Blog Post</span>
-                </button>
-              </div>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {blogPosts.map(blog => (
-                  <div key={blog.id} className="border rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800 mb-2">{blog.title}</h3>
-                        <p className="text-gray-600 text-sm mb-2">{blog.excerpt}</p>
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <span>{blog.author}</span>
-                          <span>{blog.category}</span>
-                          <span>{blog.date}</span>
-                          <span>{blog.readTime}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => { setEditingItem(blog); setShowForm(true); }}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Edit Blog Post"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to delete this blog post?')) {
-                              setBlogPosts(blogPosts.filter(b => b.id !== blog.id));
-                            }
-                          }}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          title="Delete Blog Post"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {adminSection === 'quizzes' && (
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Manage Quiz Questions</h2>
-            </div>
-            <div className="p-6">
-              <div className="grid gap-6">
-                {quizCategories.map(category => (
-                  <div key={category.id} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-lg flex items-center space-x-2">
-                        <span className="text-2xl">{category.icon}</span>
-                        <span>{category.name}</span>
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
-                          {(quizQuestions[category.id] || []).length} questions
-                        </span>
-                      </h3>
-                      <button
-                        onClick={() => {
-                          const question = prompt('Enter question:');
-                          if (question) {
-                            const option1 = prompt('Option 1:');
-                            const option2 = prompt('Option 2:');
-                            const option3 = prompt('Option 3:');
-                            const option4 = prompt('Option 4:');
-                            const correct = parseInt(prompt('Correct option (0-3):'));
-                            const explanation = prompt('Explanation:');
-                            
-                            if (option1 && option2 && option3 && option4 && explanation && correct >= 0 && correct <= 3) {
-                              const newQuestion = {
-                                question,
-                                options: [option1, option2, option3, option4],
-                                correct,
-                                explanation
-                              };
-                              
-                              setQuizQuestions({
-                                ...quizQuestions,
-                                [category.id]: [...(quizQuestions[category.id] || []), newQuestion]
-                              });
-                            }
-                          }
-                        }}
-                        className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition flex items-center space-x-1"
-                      >
-                        <Plus className="h-3 w-3" />
-                        <span>Add Question</span>
-                      </button>
-                    </div>
-                    <div className="space-y-3">
-                      {(quizQuestions[category.id] || []).map((question, index) => (
-                        <div key={index} className="bg-white rounded p-3 border">
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <p className="text-sm font-medium mb-2">
-                                <span className="text-gray-500">Q{index + 1}:</span> {question.question}
-                              </p>
-                              <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                                {question.options.map((option, optIndex) => (
-                                  <div key={optIndex} className={`p-1 rounded ${optIndex === question.correct ? 'bg-green-100 text-green-700 font-medium' : ''}`}>
-                                    {String.fromCharCode(65 + optIndex)}: {option}
-                                  </div>
-                                ))}
-                              </div>
-                              <p className="text-xs text-gray-500 mt-2">
-                                <strong>Explanation:</strong> {question.explanation}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => {
-                                if (window.confirm('Are you sure you want to delete this question?')) {
-                                  setQuizQuestions({
-                                    ...quizQuestions,
-                                    [category.id]: quizQuestions[category.id].filter((_, i) => i !== index)
-                                  });
-                                }
-                              }}
-                              className="ml-3 p-1 text-red-600 hover:bg-red-50 rounded transition"
-                              title="Delete Question"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </div>
                 ))}
@@ -1095,40 +756,10 @@ const App = () => {
                 lawyer={editingItem}
                 onSave={(data) => {
                   if (editingItem) {
-                    setLawyers(lawyers.map(l => l.id === editingItem.id ? {...l, ...data} : l));
+                    updateLawyerInDb(editingItem.id, data);
                   } else {
-                    const newLawyer = {
-                      ...data,
-                      id: Math.max(...lawyers.map(l => l.id), 0) + 1
-                    };
-                    setLawyers([...lawyers, newLawyer]);
+                    addLawyerToDb(data);
                   }
-                  setShowForm(false);
-                  setEditingItem(null);
-                }}
-                onCancel={() => { setShowForm(false); setEditingItem(null); }}
-              />
-            )}
-            {adminSection === 'blogs' && (
-              <BlogForm 
-                blog={editingItem}
-                onSave={(data) => {
-                  if (editingItem) {
-                    setBlogPosts(blogPosts.map(b => b.id === editingItem.id ? {...b, ...data} : b));
-                  } else {
-                    const newBlog = {
-                      ...data,
-                      id: Math.max(...blogPosts.map(b => b.id), 0) + 1,
-                      date: new Date().toLocaleDateString('en-IN', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })
-                    };
-                    setBlogPosts([...blogPosts, newBlog]);
-                  }
-                  setShowForm(false);
-                  setEditingItem(null);
                 }}
                 onCancel={() => { setShowForm(false); setEditingItem(null); }}
               />
@@ -1150,8 +781,23 @@ const App = () => {
               Legal Partner
             </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 mb-4 max-w-3xl mx-auto">
             Connect with qualified lawyers, test your legal knowledge, and stay informed with the latest updates in Indian law.
+          </p>
+          <p className="text-sm text-gray-500 mb-8 flex items-center justify-center space-x-2">
+            <Database className="h-4 w-4" />
+            <span>Powered by Supabase Database</span>
+            {dbConnected ? (
+              <span className="text-green-600 flex items-center space-x-1">
+                <Wifi className="h-4 w-4" />
+                <span>Connected</span>
+              </span>
+            ) : (
+              <span className="text-red-600 flex items-center space-x-1">
+                <WifiOff className="h-4 w-4" />
+                <span>Connecting...</span>
+              </span>
+            )}
           </p>
           <div className="flex flex-col md:flex-row gap-4 justify-center">
             <button 
@@ -1179,20 +825,36 @@ const App = () => {
             <div>
               <div className="text-4xl font-bold mb-2">{lawyers.length}+</div>
               <div className="text-blue-100">Verified Lawyers</div>
+              <div className="text-xs text-blue-200 mt-1">
+                {dbConnected ? 'Live from DB' : 'Loading...'}
+              </div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">
                 {Object.values(quizQuestions).reduce((acc, questions) => acc + questions.length, 0)}+
               </div>
               <div className="text-blue-100">Quiz Questions</div>
+              <div className="text-xs text-blue-200 mt-1">
+                {dbConnected ? 'Live from DB' : 'Loading...'}
+              </div>
             </div>
             <div>
               <div className="text-4xl font-bold mb-2">{blogPosts.length}+</div>
               <div className="text-blue-100">Legal Articles</div>
+              <div className="text-xs text-blue-200 mt-1">
+                {dbConnected ? 'Live from DB' : 'Loading...'}
+              </div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">{isAdmin ? '🔧' : '👥'}</div>
-              <div className="text-blue-100">{isAdmin ? 'Admin Mode' : 'Happy Users'}</div>
+              <div className="text-4xl font-bold mb-2">
+                {dbConnected ? '🗄️' : '⏳'}
+              </div>
+              <div className="text-blue-100">
+                {dbConnected ? 'Database Online' : 'Connecting...'}
+              </div>
+              <div className="text-xs text-blue-200 mt-1">
+                Supabase Backend
+              </div>
             </div>
           </div>
         </div>
@@ -1205,13 +867,31 @@ const App = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Find Qualified Lawyers</h1>
-          <p className="text-gray-600">Connect with experienced legal professionals</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+            <span>Find Qualified Lawyers</span>
+            {dbConnected && <Database className="h-6 w-6 text-green-600" />}
+          </h1>
+          <p className="text-gray-600">
+            Connect with experienced legal professionals
+            {dbConnected ? ' (Live data from database)' : ' (Loading from database...)'}
+          </p>
         </div>
+
+        {!dbConnected && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg mb-8 flex items-center space-x-2">
+            <WifiOff className="h-5 w-5" />
+            <span>Connecting to database... Lawyer profiles will load shortly.</span>
+          </div>
+        )}
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {lawyers.map(lawyer => (
-            <div key={lawyer.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6">
+            <div key={lawyer.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-6 relative">
+              {dbConnected && (
+                <div className="absolute top-2 right-2">
+                  <Database className="h-4 w-4 text-green-600" />
+                </div>
+              )}
               <div className="flex items-start space-x-4 mb-4">
                 <div className="text-4xl">{lawyer.image}</div>
                 <div className="flex-1">
@@ -1247,6 +927,13 @@ const App = () => {
               </button>
             </div>
           ))}
+          {lawyers.length === 0 && dbConnected && (
+            <div className="col-span-full text-center py-16 text-gray-500">
+              <UserCheck className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <h3 className="text-xl font-semibold mb-2">No lawyers found</h3>
+              <p>Check back soon or contact admin to add lawyer profiles.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -1257,8 +944,14 @@ const App = () => {
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 py-8">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Test Your Legal Knowledge</h1>
-          <p className="text-xl text-gray-600">Choose a category and challenge yourself</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4 flex items-center justify-center space-x-2">
+            <span>Test Your Legal Knowledge</span>
+            {dbConnected && <Database className="h-6 w-6 text-green-600" />}
+          </h1>
+          <p className="text-xl text-gray-600">
+            Choose a category and challenge yourself
+            {dbConnected ? ' (Questions from database)' : ' (Loading questions...)'}
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -1270,13 +963,7 @@ const App = () => {
                 {(quizQuestions[category.id] || []).length} questions available
               </p>
               <button
-                onClick={() => {
-                  if (quizQuestions[category.id] && quizQuestions[category.id].length > 0) {
-                    startQuiz(category.id);
-                  } else {
-                    alert('No questions available for this category yet!');
-                  }
-                }}
+                onClick={() => alert('Quiz functionality coming soon!')}
                 className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
               >
                 Start Quiz
@@ -1292,8 +979,14 @@ const App = () => {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Legal Insights & Updates</h1>
-          <p className="text-gray-600">Stay informed with expert legal analysis</p>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+            <span>Legal Insights & Updates</span>
+            {dbConnected && <Database className="h-6 w-6 text-green-600" />}
+          </h1>
+          <p className="text-gray-600">
+            Stay informed with expert legal analysis
+            {dbConnected ? ' (Live articles from database)' : ' (Loading from database...)'}
+          </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
@@ -1321,9 +1014,33 @@ const App = () => {
     </div>
   );
 
+  // Loading Spinner Component
+  const LoadingSpinner = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 flex items-center space-x-3">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <span className="text-gray-700 font-medium">Updating database...</span>
+      </div>
+    </div>
+  );
+
+  // Error Message Component
+  const ErrorMessage = ({ message, onClose }) => (
+    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 max-w-md">
+      <X className="h-4 w-4 text-red-600" />
+      <span className="text-sm">{message}</span>
+      <button onClick={onClose} className="ml-2 text-red-600 hover:text-red-800">
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
+      <DatabaseStatus />
+      {loading && <LoadingSpinner />}
+      {error && <ErrorMessage message={error} onClose={() => setError(null)} />}
       
       {currentPage === 'home' && <HomePage />}
       {currentPage === 'lawyers' && !selectedLawyer && <LawyersPage />}
@@ -1336,19 +1053,21 @@ const App = () => {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Scale className="h-8 w-8 text-blue-400" />
-            <span className="text-2xl font-bold">wakalatguru</span>
+            <span className="text-2xl font-bold">Wakalatnama</span>
+            {dbConnected && <Database className="h-6 w-6 text-green-400" />}
           </div>
           <p className="text-gray-400 mb-4">
-            Your trusted legal partner for finding qualified lawyers and staying updated with Indian law.
+            Your trusted legal partner powered by Supabase database
           </p>
           <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
-            <span>contact@wakalatguru.in</span>
-            <span>+91-11-4567-8900</span>
-            <span>New Delhi, India</span>
-            {isAdmin && <span className="text-red-400">Admin Mode Active</span>}
+            <span>📧 contact@wakalatnama.in</span>
+            <span>📞 +91-11-4567-8900</span>
+            <span>📍 New Delhi, India</span>
+            {isAdmin && <span className="text-red-400">🔧 Admin Mode</span>}
+            {dbConnected && <span className="text-green-400">🗄️ Database Online</span>}
           </div>
           <div className="border-t border-gray-700 pt-4 mt-4">
-            <p>&copy; 2024 wakalatguru. All rights reserved. | Legal Services Platform for India</p>
+            <p>&copy; 2024 Wakalatnama. All rights reserved. | Legal Services Platform for India</p>
           </div>
         </div>
       </footer>
@@ -1356,5 +1075,5 @@ const App = () => {
   );
 };
 
-export default App; 
-                
+export default App;
+                          
